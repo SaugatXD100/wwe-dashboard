@@ -66,5 +66,23 @@ To change who glows as a champion:
 
 The website updates automatically.
 
+🛠 Technologies Used
+
+- HTML  
+- CSS  
+- JavaScript  
+- PapaParse (CSV parsing)  
+- GitHub Pages (hosting)  
+
 ## 📜 License
-This project uses the MIT License.
+
+This project is licensed under the **MIT License** — meaning you can use, modify, and publish it freely.
+
+🤝 Contributing
+
+Pull requests are welcome.  
+Feel free to submit improvements or new feature ideas.
+
+📧 Contact
+
+If you want more features or need help, feel free to open an issue.
