@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WWE Titles Dashboard</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background-color: #111;
+  color: #fff;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+}
+h1 {
+  background: linear-gradient(to right, #ff0000, #007bff, #ffcc00);
+  padding: 15px;
+  margin: 0;
+  font-size: 28px;
+}
+
+#search-bar {
+  background-color: #d3d3d3;
+  margin: 20px auto;
+  padding: 10px;
+  width: 50%;
+  max-width: 400px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+  text-align: center;
+}
+
+#brand-filter {
+  margin: 10px auto;
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+  background-color: #222;
+  color: #fff;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+#brand-filter option {
+  background-color: #111;
+  color: #fff;
+}
+
+/* Hover effect */
+#brand-filter:hover {
+  background-color: #333;
+}
+
+/* Brand-specific colors */
+#brand-filter.raw { background-color: #b30000; }
+#brand-filter.smackdown { background-color: #0056b3; }
+#brand-filter.nxt { background-color: #bfa000; }
+#brand-filter.unbranded { background-color: #666; }
+
+.champion {
+  box-shadow: 0 0 18px 4px rgba(255, 215, 0, 0.18);
+  border-left: 6px solid rgba(255, 215, 0, 0.95);
+  font-weight: 700;
+}
+
+
+p {
+  color: #ccc;
+  margin-top: 8px;
+}
+table {
+  width: 95%;
+  margin: 20px auto;
+  border-collapse: collapse;
+  background: #1c1c1c;
+  box-shadow: 0 0 10px rgba(255,255,255,0.1);
+}
+
+th {
+  background-color: #222;
+  cursor: pointer;
+  user-select: none;
+}
+th:hover {
+  background-color: #333;
+}
+
+th.sorted-asc::after {
+  content: " ▲";
+  color: #00ff99;
+}
+
+th.sorted-desc::after {
+  content: " ▼";
+  color: #ff6666;
+}
+
+
+th, td {
+  border: 1px solid #333;
+  padding: 8px;
+  text-align: center;
+  font-size: 14px;
+}
+th {
+  background-color: #222;
+}
+tr.raw td { background-color: rgba(255,0,0,0.15); }
+tr.smackdown td { background-color: rgba(0,123,255,0.15); }
+tr.nxt td { background-color: rgba(255,204,0,0.15); }
+tr.unbranded td { background-color: rgba(255, 255, 255, 0.5); }
+tr:hover { background-color: rgba(255,255,255,0.1); }
+@media (max-width:900px) {
+  table, th, td { font-size: 12px; }
+}
+
+/* --- Responsive filter layout --- */
+#filters {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  margin: 12px 0;
+  padding: 0 12px;
+}
+#filters .filter-item { flex: 1 1 260px; max-width: 420px; }
+
+/* keep input/select full width inside filter item */
+#filters input#search-bar, #filters select#brand-filter {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Small screen: compact controls */
+@media (max-width: 700px) {
+  #filters { gap: 8px; padding: 0 8px; }
+  #filters .filter-item { flex: 1 1 100%; max-width: none; }
+}
+
+/* --- Table responsiveness --- */
+/* allow horizontal scroll on narrow screens */
+#data-table {
+  width: 95%;
+  max-width: 100%;
+  margin: 12px auto;
+  display: block;
+  overflow-x: auto;
+}
+
+/* Compact table font on smaller devices */
+@media (max-width: 900px) {
+  table, th, td { font-size: 12px; }
+}
+
+/* Convert to card-style rows for very small screens */
+@media (max-width: 540px) {
+  /* hide the table header and make rows behave like cards */
+  #data-table thead { display: none; }
+  #data-table tbody, #data-table tr { display: block; width: 100%; }
+  #data-table tr {
+    margin: 10px 12px;
+    padding: 10px;
+    border-radius: 10px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    box-shadow: 0 4px 14px rgba(0,0,0,0.6);
+  }
+  #data-table td {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 10px;
+    border: none;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-size: 13px;
+  }
+  #data-table td:last-child { border-bottom: none; }
+  /* label shown on left via data-label attribute */
+  #data-table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #aaa;
+    margin-right: 10px;
+  }
+}
+
+
+</style>
+</head>
+<body>
+<h1>WWE Titles Dashboard</h1>
+
+<!-- Filters (search + brand) -->
+<div id="filters">
+  <div class="filter-item">
+    <label class="sr-only" for="search-bar">Search</label>
+    <input type="text" id="search-bar" placeholder="Type a Superstar name...">
+  </div>
+
+  <div class="filter-item">
+    <label class="sr-only" for="brand-filter">Brand</label>
+    <select id="brand-filter">
+      <option value="all">All Brands</option>
+      <option value="raw">RAW</option>
+      <option value="smackdown">SmackDown</option>
+      <option value="nxt">NXT</option>
+      <option value="unbranded">Unbranded</option>
+    </select>
+  </div>
+</div>
+
+
+
+<p>Data loaded automatically from <b>wwe_titles_combined.csv</b></p>
+
+<table id="data-table">
+  <thead></thead>
+  <tbody></tbody>
+</table>
+
+<!-- PapaParse Library -->
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<script>
+const tableHead = document.querySelector("#data-table thead");
+const tableBody = document.querySelector("#data-table tbody");
+let allData = [];
+let championsList = [];
+
+let originalData = [];
+let currentSortColumn = null;
+let currentSortOrder = "default"; // default → asc → desc → default
+
+
+
+
+// 1️⃣ Load current champions first
+Papa.parse("current_champions.csv", {
+  download: true,
+  header: true,
+  complete: function(champs) {
+    championsList = champs.data.map(c => (c.Wrestler || "").trim().toLowerCase());
+
+    // 2️⃣ Then load main data
+    Papa.parse("wwe_titles_combined.csv", {
+      download: true,
+      header: true,
+      complete: function(results) {
+
+        const cleaned = results.data.filter(row =>
+          Object.values(row).some(v => (v || "").trim() !== "")
+        );
+
+        allData = cleaned;
+        // Save original order for reset
+        originalData = [...cleaned];        
+
+
+        if (!allData.length) return;
+
+        const headers = Object.keys(allData[0]);
+        tableHead.innerHTML = "<tr>" + headers.map(h => `<th data-column="${h}">${h}</th>`).join("") + "</tr>";
+        
+        function getFilteredData() {
+          const brand = document.getElementById("brand-filter").value;
+          const searchTerm = document.getElementById("search-bar").value.toLowerCase();
+
+          return allData.filter(row => {
+            const matchesBrand = brand === "all" || (row.Brand || "").toLowerCase() === brand;
+            const matchesSearch = (row.Wrestler || "").toLowerCase().includes(searchTerm);
+            return matchesBrand && matchesSearch;
+          });
+        }
+
+
+        document.querySelectorAll("#data-table thead th").forEach(th => {
+          th.addEventListener("click", () => {
+            const column = th.dataset.column;
+
+            // Remove highlight from previous column
+            document.querySelectorAll("#data-table thead th").forEach(h => h.classList.remove("sorted-asc", "sorted-desc"));
+
+            if (currentSortColumn !== column) {
+              // New column → start with ASC
+              currentSortColumn = column;
+              currentSortOrder = "asc";
+              th.classList.add("sorted-asc");
+            } else {
+              // Cycle sort order
+              if (currentSortOrder === "asc") {
+                currentSortOrder = "desc";
+                th.classList.add("sorted-desc");
+              } else if (currentSortOrder === "desc") {
+                currentSortOrder = "default";
+                currentSortColumn = null;
+              } else {
+                currentSortOrder = "asc";
+                th.classList.add("sorted-asc");
+              }
+            }
+
+            applyFilters();
+          });
+        });
+
+        function applySorting(data) {
+          if (currentSortOrder === "default" || !currentSortColumn) {
+            // return original CSV order
+            return [...originalData].filter(row => data.includes(row));
+          }
+
+          let sorted = [...data].sort((a, b) => {
+            const valA = (a[currentSortColumn] || "").toString().toLowerCase();
+            const valB = (b[currentSortColumn] || "").toString().toLowerCase();
+
+            if (valA < valB) return currentSortOrder === "asc" ? -1 : 1;
+            if (valA > valB) return currentSortOrder === "asc" ? 1 : -1;
+            return 0;
+          });
+
+          return sorted;
+        }
+
+        renderRows(allData);
+
+        function applyFilters() {
+          
+          let filteredData = getFilteredData();
+
+          // Apply sorting
+          filteredData = applySorting(filteredData);
+
+          renderRows(filteredData);
+        }
+
+
+        // 🔍 Search updates live
+        document.getElementById("search-bar").addEventListener("input", applyFilters);
+
+        // 🟦 Brand filter updates live
+        document.getElementById("brand-filter").addEventListener("change", applyFilters);
+
+      }
+    });
+  }
+});
+
+
+function renderRows(data) {
+  // ensure we don't render empty rows
+  tableBody.innerHTML = data
+    .filter(row => Object.values(row).some(v => (v || "").toString().trim() !== ""))
+    .map(row => {
+      const brand = (row.Brand || "").toLowerCase();
+      const isChampion = championsList.includes((row.Wrestler || "").trim().toLowerCase());
+      const rowClass = `${brand}${isChampion ? " champion" : ""}`.trim();
+
+      // Build cells using headers from originalData[0] so data-label order is stable
+      const headers = Object.keys(originalData[0] || row);
+      const cells = headers.map(h => `<td data-label="${h}">${row[h] || ""}</td>`).join("");
+
+      return `<tr class="${rowClass}">${cells}</tr>`;
+    })
+    .join("");
+}
+
+</script>
+
+</body>
+</html>
