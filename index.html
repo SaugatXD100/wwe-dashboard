@@ -239,14 +239,14 @@ let currentSortOrder = "default"; // default → asc → desc → default
 
 
 // 1️⃣ Load current champions first
-Papa.parse("current_champions.csv", {
+Papa.parse("current_champions.csv?v=" + Date.now(), {
   download: true,
   header: true,
   complete: function(champs) {
     championsList = champs.data.map(c => (c.Wrestler || "").trim().toLowerCase());
 
     // 2️⃣ Then load main data
-    Papa.parse("wwe_titles_combined.csv", {
+    Papa.parse("wwe_titles_combined.csv?v=" + Date.now(), {
       download: true,
       header: true,
       complete: function(results) {
