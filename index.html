@@ -221,6 +221,13 @@ tr:hover { background-color: rgba(255,255,255,0.1); }
   </div>
 </div>
 
+<br>
+<label style="cursor:pointer;">
+  <input type="checkbox" id="champion-toggle">
+  Show only current champions
+</label>
+
+
 <p class="left-text">
 The WWE Dashboard provides a complete view of WWE championship reigns across all superstars.
 Explore title history from RAW, SmackDown, and NXT, with current champions visually highlighted
@@ -280,11 +287,14 @@ Papa.parse("current_champions.csv?v=" + Date.now(), {
         function getFilteredData() {
           const brand = document.getElementById("brand-filter").value;
           const searchTerm = document.getElementById("search-bar").value.toLowerCase();
+          const championsOnly = document.getElementById("champion-toggle").checked;
 
           return allData.filter(row => {
             const matchesBrand = brand === "all" || (row.Brand || "").toLowerCase() === brand;
-            const matchesSearch = (row.Wrestler || "").toLowerCase().includes(searchTerm);
-            return matchesBrand && matchesSearch;
+            const matchesSearch = wrestlerName.includes(searchTerm);
+            const matchesChampion = !championsOnly || championsList.includes(wrestlerName);
+            
+            return matchesBrand && matchesSearch && matchesChampion;
           });
         }
 
@@ -355,6 +365,12 @@ Papa.parse("current_champions.csv?v=" + Date.now(), {
 
         // 🟦 Brand filter updates live
         document.getElementById("brand-filter").addEventListener("change", applyFilters);
+
+        // 🏆 Current champions toggle
+        document
+          .getElementById("champion-toggle")
+          .addEventListener("change", applyFilters);
+
 
       }
     });
