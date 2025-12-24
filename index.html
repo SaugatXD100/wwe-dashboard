@@ -290,6 +290,8 @@ Papa.parse("current_champions.csv?v=" + Date.now(), {
           const championsOnly = document.getElementById("champion-toggle").checked;
 
           return allData.filter(row => {
+            const wrestlerName = (row.Wrestler || "").toLowerCase();
+            
             const matchesBrand = brand === "all" || (row.Brand || "").toLowerCase() === brand;
             const matchesSearch = wrestlerName.includes(searchTerm);
             const matchesChampion = !championsOnly || championsList.includes(wrestlerName);
