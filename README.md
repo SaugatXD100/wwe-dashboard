@@ -56,7 +56,7 @@ Method 2 — GitHub Pages
 5. Save  
 
 Your site will be live at:  
-https://saugatxd100.github.io/wwe-dashboard/
+https://wwedashboard.xyz/
 
 📝 Updating Champions
 To change who glows as a champion:
